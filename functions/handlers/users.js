@@ -115,8 +115,10 @@ exports.getAllUsers = (req, res) => {
             return res.json(users);
         })
         .catch(err => {
-            res.status(500).send({ error: "Something went wrong, please try again" });
             console.error(err);
+            return res
+                .status(500)
+                .send({ error: "Something went wrong, please try again. " + err.code });
         });
 };
 
