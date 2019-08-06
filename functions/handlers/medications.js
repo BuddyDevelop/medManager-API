@@ -42,15 +42,20 @@ exports.addMedication = (req, res) => {
 
     if (!valid) return res.status(400).json(validateErrors);
 
-    db.ref()
+    const ref = db
+        .ref()
         .child(`medications/${userPesel}`)
-        .push()
-        .set(medication, err => {
-            if (!err) return res.status(200).json({ success: "Data added successfully." });
+        .push();
+    const key = ref.key;
 
-            console.error(err);
-            return res.status(500).json({ error: "Something went wrong, please try again. " });
-        });
+    ref.set(medication, err => {
+        if (!err) return res.status(200).json({ success: "Data added successfully.", id: key });
+
+        console.error(err);
+        if (err.code === "auth/id-token-expired")
+            res.status(401).json({ error: "You are logged out, log in and try again. " });
+        return res.status(500).json({ error: "Something went wrong, please try again. " });
+    });
 };
 
 exports.deleteUserMedication = (req, res) => {

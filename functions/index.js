@@ -11,6 +11,7 @@ const {
     deleteUserMedication,
     updateMedication
 } = require("./handlers/medications");
+const { addReceipt, getUserReceipts } = require("./handlers/receipts");
 const firebaseAuth = require("./util/firebaseAuth");
 
 /**
@@ -25,5 +26,7 @@ app.get("/medications/:pesel", firebaseAuth, getUserMedications);
 app.post("/medications/:pesel", firebaseAuth, addMedication);
 app.delete("/medications/:pesel", firebaseAuth, deleteUserMedication);
 app.patch("/medications/:pesel", firebaseAuth, updateMedication);
+app.get("/receipts/:pesel", firebaseAuth, getUserReceipts);
+app.post("/receipts/:pesel", firebaseAuth, addReceipt);
 
 exports.api = functions.region("europe-west2").https.onRequest(app);
