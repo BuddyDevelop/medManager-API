@@ -1,5 +1,7 @@
 const functions = require("firebase-functions");
 
+const { admin, db } = require("./util/admin");
+
 //initialzie express
 const app = require("express")();
 // const app = express();
@@ -28,5 +30,105 @@ app.delete("/medications/:pesel", firebaseAuth, deleteUserMedication);
 app.patch("/medications/:pesel", firebaseAuth, updateMedication);
 app.get("/receipts/:pesel", firebaseAuth, getUserReceipts);
 app.post("/receipts/:pesel", firebaseAuth, addReceipt);
+
+//push notification to user device on new medication added
+exports.sendMedicationNotification = functions
+    .region("europe-west2")
+    .database.ref("/medications/{userPesel}/{medId}")
+    .onCreate((event, context) => {
+        // .onWrite((event, context) => {
+        const userPesel = context.params.userPesel;
+
+        return db
+            .ref("Users")
+            .orderByChild("pesel")
+            .equalTo(userPesel)
+            .once("value")
+            .then(snapshot => {
+                if (!snapshot.exists()) return;
+
+                var userTokens = [];
+
+                snapshot.forEach(childSnapshot => {
+                    userTokens.push(childSnapshot.val().token);
+                });
+
+                if (userTokens.length === 0) return;
+
+                // console.log(`Token is as follow: ${userTokens[0]}`);
+
+                const payload = {
+                    notification: {
+                        title: "New medication!",
+                        body: `${event._data.name}, ${event._data.doseUnit},${event._data.dose} `,
+                        badge: "1",
+                        sound: "default"
+                    },
+                    data: {
+                        title: "New Title",
+                        message: "New message"
+                    }
+                };
+
+                return admin.messaging().sendToDevice(userTokens, payload);
+            });
+    });
+
+//push notification to user device on new receipt added
+exports.sendReceiptNotification = functions
+    .region("europe-west2")
+    .database.ref("/receipts/{userPesel}/{medId}")
+    .onCreate((event, context) => {
+        // .onWrite((event, context) => {
+        const userPesel = context.params.userPesel;
+
+        return db
+            .ref("Users")
+            .orderByChild("pesel")
+            .equalTo(userPesel)
+            .once("value")
+            .then(snapshot => {
+                if (!snapshot.exists()) return;
+
+                var userTokens = [];
+
+                snapshot.forEach(childSnapshot => {
+                    userTokens.push(childSnapshot.val().token);
+                });
+
+                if (userTokens.length === 0) return;
+
+                // console.log(event);
+                // console.log(`Token is as follow: ${userTokens[0]}`);
+                // console.log(event._data.medications);
+
+                // var receiptMeds = [];
+                // const meds = event._data.medications;
+
+                //loop through medications in receipt and put them to array
+                // Object.values(meds).forEach((med, index) => {
+                //     receiptMeds.push(med.medication);
+                // });
+
+                const payload = {
+                    notification: {
+                        title: "New receipt!",
+                        body: `Created at ${event._data.created} by ${
+                            event._data.doctorName
+                        }. Realize receipt to ${event._data.realizeTo}. `,
+                        badge: "1",
+                        sound: "default"
+                    },
+                    data: {
+                        title: "New receipt!",
+                        createdAt: event._data.created,
+                        createdBy: event._data.doctorName,
+                        realizeTo: event._data.realizeTo
+                    }
+                };
+
+                return admin.messaging().sendToDevice(userTokens, payload);
+            });
+    });
 
 exports.api = functions.region("europe-west2").https.onRequest(app);

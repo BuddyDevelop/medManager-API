@@ -123,6 +123,8 @@ exports.updateMedication = (req, res) => {
         })
         .catch(err => {
             console.error(err);
+            if (err.code === "auth/id-token-expired")
+                res.status(401).json({ error: "You are logged out, log in and try again. " });
             return res.status(500).json({ error: "Something went wrong, please try again. " });
         });
 };
