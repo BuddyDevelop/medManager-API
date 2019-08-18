@@ -58,15 +58,9 @@ exports.sendMedicationNotification = functions
                 // console.log(`Token is as follow: ${userTokens[0]}`);
 
                 const payload = {
-                    notification: {
-                        title: "New medication!",
-                        body: `${event._data.name}, ${event._data.doseUnit},${event._data.dose} `,
-                        badge: "1",
-                        sound: "default"
-                    },
                     data: {
-                        title: "New Title",
-                        message: "New message"
+                        title: "New medication!",
+                        message: `${event._data.name}, ${event._data.doseUnit}, ${event._data.dose}`
                     }
                 };
 
