@@ -98,27 +98,7 @@ exports.sendReceiptNotification = functions
 
                 if (userTokens.length === 0) return;
 
-                // console.log(event);
-                // console.log(`Token is as follow: ${userTokens[0]}`);
-                // console.log(event._data.medications);
-
-                // var receiptMeds = [];
-                // const meds = event._data.medications;
-
-                //loop through medications in receipt and put them to array
-                // Object.values(meds).forEach((med, index) => {
-                //     receiptMeds.push(med.medication);
-                // });
-
                 const payload = {
-                    notification: {
-                        title: "New receipt!",
-                        body: `Created at ${event._data.created} by ${
-                            event._data.doctorName
-                        }. Realize receipt to ${event._data.realizeTo}. `,
-                        badge: "1",
-                        sound: "default"
-                    },
                     data: {
                         title: "New receipt!",
                         createdAt: event._data.created,
