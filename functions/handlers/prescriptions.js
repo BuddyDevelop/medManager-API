@@ -1,9 +1,9 @@
 const { db } = require("../util/admin");
 
-exports.addReceipt = (req, res) => {
+exports.addPrescription = (req, res) => {
     const userPesel = req.params.pesel;
 
-    const receipt = {
+    const prescription = {
         doctor: req.body.doctor,
         doctorName: req.body.doctorName,
         created: req.body.created,
@@ -13,11 +13,11 @@ exports.addReceipt = (req, res) => {
 
     const ref = db
         .ref()
-        .child(`receipts/${userPesel}`)
+        .child(`prescriptions/${userPesel}`)
         .push();
     const key = ref.key;
 
-    ref.set(receipt, err => {
+    ref.set(prescription, err => {
         if (!err) return res.status(200).json({ success: "Data added successfully.", id: key });
 
         console.error(err);
@@ -25,22 +25,25 @@ exports.addReceipt = (req, res) => {
     });
 };
 
-exports.getUserReceipts = (req, res) => {
+exports.getUserPrescriptions = (req, res) => {
     const userPesel = req.params.pesel;
 
     if (userPesel.trim() === "")
         return res.status(404).json({ user: "No user with such pesel, please try again" });
 
     db.ref()
-        .child("receipts")
+        .child("prescriptions")
         .orderByKey()
         .equalTo(userPesel)
         .once("value")
         .then(snapshot => {
             if (snapshot.exists()) {
-                const userReceipts = snapshot.val();
-                return res.status(200).send(userReceipts);
-            } else return res.status(404).json({ receipts: "User has no receipts prescribed" });
+                const userPrescriptions = snapshot.val();
+                return res.status(200).send(userPrescriptions);
+            } else
+                return res
+                    .status(404)
+                    .json({ prescriptions: "User has no prescriptions prescribed" });
         })
         .catch(err => {
             console.error(err);

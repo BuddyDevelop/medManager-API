@@ -13,7 +13,7 @@ const {
     deleteUserMedication,
     updateMedication
 } = require("./handlers/medications");
-const { addReceipt, getUserReceipts } = require("./handlers/receipts");
+const { addPrescription, getUserPrescriptions } = require("./handlers/prescriptions");
 const firebaseAuth = require("./util/firebaseAuth");
 
 /**
@@ -28,8 +28,8 @@ app.get("/medications/:pesel", firebaseAuth, getUserMedications);
 app.post("/medications/:pesel", firebaseAuth, addMedication);
 app.delete("/medications/:pesel", firebaseAuth, deleteUserMedication);
 app.patch("/medications/:pesel", firebaseAuth, updateMedication);
-app.get("/receipts/:pesel", firebaseAuth, getUserReceipts);
-app.post("/receipts/:pesel", firebaseAuth, addReceipt);
+app.get("/prescriptions/:pesel", firebaseAuth, getUserPrescriptions);
+app.post("/prescriptions/:pesel", firebaseAuth, addPrescription);
 
 //push notification to user device on new medication added
 exports.sendMedicationNotification = functions
@@ -68,10 +68,10 @@ exports.sendMedicationNotification = functions
             });
     });
 
-//push notification to user device on new receipt added
-exports.sendReceiptNotification = functions
+//push notification to user device on new prescription added
+exports.sendPrescriptionNotification = functions
     .region("europe-west2")
-    .database.ref("/receipts/{userPesel}/{medId}")
+    .database.ref("/prescriptions/{userPesel}/{medId}")
     .onCreate((event, context) => {
         // .onWrite((event, context) => {
         const userPesel = context.params.userPesel;
@@ -94,7 +94,7 @@ exports.sendReceiptNotification = functions
 
                 const payload = {
                     data: {
-                        title: "New receipt!",
+                        title: "New prescription!",
                         createdAt: event._data.created,
                         createdBy: event._data.doctorName,
                         realizeTo: event._data.realizeTo
