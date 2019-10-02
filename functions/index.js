@@ -2,9 +2,12 @@ const functions = require("firebase-functions");
 
 const { admin, db } = require("./util/admin");
 
+//cors is needed bc of CORS policy
+const cors = require("cors");
+
 //initialzie express
 const app = require("express")();
-// const app = express();
+app.use(cors());
 
 const { signup, login, getAllUsers, getDoctorData } = require("./handlers/users");
 const {
